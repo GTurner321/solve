@@ -52,14 +52,14 @@
 
     const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
 
-    const toFraction = (decimal) => {
-      let denominator = 1;
-      while (Math.abs(decimal * denominator - Math.round(decimal * denominator)) > 1e-10) {
-        denominator *= 10;
+    const toRecurringDecimal = (decimal) => {
+      const str = decimal.toString();
+      const match = str.match(/^(\d+)\.(\d*?)(\d+)\3+$/);
+      if (match) {
+        const [_, intPart, nonRec, rec] = match;
+        return `${intPart}.${nonRec}${rec}rec`;
       }
-      const numerator = Math.round(decimal * denominator);
-      const divisor = gcd(numerator, denominator);
-      return `${numerator / divisor}/${denominator / divisor}`;
+      return decimal.toFixed(10).replace(/\.0+$/, '');
     };
 
     const formatEquation = (a, b, c, d) => {
@@ -70,8 +70,15 @@
         return `${coef > 0 ? '' : '- '}${Math.abs(coef)}${variable}`;
       };
 
-      const left = [formatTerm(a, 'x'), b !== 0 ? `${b > 0 ? '+ ' : '- '}${Math.abs(b)}` : ''].filter(Boolean).join(' ');
-      const right = [formatTerm(c, 'x'), d !== 0 ? `${d > 0 ? '+ ' : '- '}${Math.abs(d)}` : ''].filter(Boolean).join(' ');
+      const left = [
+        formatTerm(a, 'x'),
+        b !== 0 ? `${b > 0 ? '+ ' : '- '}${Math.abs(b)}` : ''
+      ].filter(Boolean).join(' ').replace(/\+\s/g, '+').replace(/\-\s/g, '-');
+
+      const right = [
+        formatTerm(c, 'x'),
+        d !== 0 ? `${d > 0 ? '+ ' : '- '}${Math.abs(d)}` : ''
+      ].filter(Boolean).join(' ').replace(/\+\s/g, '+').replace(/\-\s/g, '-');
 
       return `${left} = ${right}`;
     };
@@ -88,10 +95,12 @@
     let a, b, c, d;
 
     const resetEquation = () => {
-      a = randomInt(1, 10);
-      b = randomInt(1, 10);
-      c = randomInt(1, 10);
-      d = randomInt(1, 10);
+      do {
+        a = randomInt(1, 10);
+        b = randomInt(1, 10);
+        c = randomInt(1, 10);
+        d = randomInt(1, 10);
+      } while (a === c); // Ensure a != c
       updateEquation();
     };
 
@@ -103,7 +112,9 @@
 
       const equationDiv = document.createElement('div');
       equationDiv.classList.add('equation');
-      equationDiv.innerHTML = `${formatEquation(a, b, c, d)}`;
+
+      equationDiv.innerHTML = `<span>${formatEquation(a, b, c, d)}</span>`;
+
       if (previousInput) {
         const userInput = document.createElement('span');
         userInput.textContent = ` (${previousInput})`;
@@ -111,23 +122,31 @@
         equationDiv.appendChild(userInput);
       }
 
-      const inputRow = document.createElement('div');
-      inputRow.classList.add('input-row');
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Enter operation (e.g., +2, -3x)';
-      inputRow.appendChild(input);
-
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          handleInput(input.value);
-          inputRow.removeChild(input);
-        }
-      });
-
-      equationDiv.appendChild(inputRow);
       equationContainer.appendChild(equationDiv);
+
+      if (a !== 1 || b !== 0 || c !== 0) {
+        const inputRow = document.createElement('div');
+        inputRow.classList.add('input-row');
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Enter operation (e.g., +2, -3x)';
+
+        inputRow.appendChild(input);
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            handleInput(input.value);
+          }
+        });
+
+        equationDiv.appendChild(inputRow);
+      } else {
+        const congratsDiv = document.createElement('div');
+        congratsDiv.classList.add('congratulations');
+        congratsDiv.textContent = 'Congratulations! You have solved the equation. Refresh the page for a new equation.';
+        equationContainer.appendChild(congratsDiv);
+      }
     };
 
     const handleInput = (input) => {
