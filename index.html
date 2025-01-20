@@ -54,10 +54,10 @@
 
     const toRecurringDecimal = (decimal) => {
       const str = decimal.toString();
-      const match = str.match(/^\d+\.(\d*?)(\d+)\2+$/);
+      const match = str.match(/^(-?\d+)\.(\d*?)(\d+)\3+$/);
       if (match) {
-        const [_, nonRec, rec] = match;
-        return `${str.split('.')[0]}.${nonRec}${rec}rec`;
+        const [_, intPart, nonRec, rec] = match;
+        return `${intPart}.${nonRec}${rec}rec`;
       }
       return decimal.toFixed(10).replace(/\.0+$/, '');
     };
@@ -66,31 +66,28 @@
       const formatTerm = (coef, variable) => {
         if (coef === 0) return '';
         if (coef === 1) return variable;
-        if (coef === -1) return `- ${variable}`;
-        return `${coef > 0 ? '' : '- '}${Math.abs(coef)}${variable}`;
+        if (coef === -1) return `-${variable}`;
+        return `${coef > 0 ? '' : '-'}${Math.abs(coef)}${variable}`;
       };
 
       const left = [
         formatTerm(a, 'x'),
-        b !== 0 ? `${b > 0 ? '+ ' : '- '}${Math.abs(b)}` : ''
-      ].filter(Boolean).join(' ').replace(/\+\s/g, '+ ').replace(/\-\s/g, '- ');
+        b !== 0 ? `${b > 0 ? '+ ' : '- '}${Math.abs(b)}` : (a === 0 && b === 0 ? '0' : '')
+      ].filter(Boolean).join(' ').replace(/\+\s/g, '+').replace(/\-\s/g, '-');
 
       const right = [
         formatTerm(c, 'x'),
-        d !== 0 ? `${d > 0 ? '+ ' : '- '}${Math.abs(d)}` : ''
-      ].filter(Boolean).join(' ').replace(/\+\s/g, '+ ').replace(/\-\s/g, '- ');
-
-      if (a === 0 && left.startsWith('+ ')) left = left.slice(2);
-      if (c === 0 && right.startsWith('+ ')) right = right.slice(2);
+        d !== 0 ? `${d > 0 ? '+ ' : '- '}${Math.abs(d)}` : (c === 0 && d === 0 ? '0' : '')
+      ].filter(Boolean).join(' ').replace(/\+\s/g, '+').replace(/\-\s/g, '-');
 
       return `${left} = ${right}`;
     };
 
     const parseInput = (input) => {
-      const standardizedInput = input.replace('/', '÷').replace(/^\+x$/, '+1x').replace(/^-x$/, '-1x');
-      const match = standardizedInput.match(/^([+\-x\u00F7])(-?\d+|1)(x?)$/);
+      const standardizedInput = input.replace('/', '÷').replace(/^(\+|\-)x$/, '$11x').replace(/x(-\d+)/, 'x$1');
+      const match = standardizedInput.match(/^([+\-x\u00F7])(-?\d+(\.\d+)?)(x?)$/);
       if (!match) return null;
-      const [, operator, value, isVariable] = match;
+      const [, operator, value, , isVariable] = match;
       return { operator, value: parseFloat(value), isVariable: isVariable === 'x' };
     };
 
@@ -140,9 +137,8 @@
         input.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') {
             handleInput(input.value);
-            input.setAttribute('disabled', 'true');
-            input.style.cursor = 'default';
-            const nextInput = document.querySelector('.input-row input:not([disabled])');
+            input.disabled = true;
+            const nextInput = inputRow.parentElement.nextElementSibling?.querySelector('input');
             if (nextInput) nextInput.focus();
           }
         });
@@ -151,20 +147,8 @@
       } else {
         const congratsDiv = document.createElement('div');
         congratsDiv.classList.add('congratulations');
-        congratsDiv.textContent = `x = ${d}`;
+        congratsDiv.textContent = 'Congratulations! You have solved the equation. Refresh the page for a new equation.';
         equationContainer.appendChild(congratsDiv);
-
-        if (d < 0) {
-          const altAnswerDiv = document.createElement('div');
-          altAnswerDiv.classList.add('congratulations');
-          altAnswerDiv.textContent = `${-d} = x → x = ${d}`;
-          equationContainer.appendChild(altAnswerDiv);
-        }
-
-        const finalCongratsDiv = document.createElement('div');
-        finalCongratsDiv.classList.add('congratulations');
-        finalCongratsDiv.textContent = 'Congratulations! You have solved the equation. Refresh the page for a new equation.';
-        equationContainer.appendChild(finalCongratsDiv);
       }
     };
 
@@ -181,7 +165,7 @@
       message.textContent = '';
 
       if (isVariable) {
-        if (operator === 'x' || operator === '÷') {
+        if (operator === 'x' || operator === '\u00F7') {
           message.textContent = 'This is not supported, try again';
           return;
         }
@@ -204,7 +188,7 @@
           b *= value;
           c *= value;
           d *= value;
-        } else if (operator === '÷') {
+        } else if (operator === '\u00F7') {
           a /= value;
           b /= value;
           c /= value;
@@ -219,17 +203,34 @@
         equationDiv.textContent = `x = ${d}`;
         equationContainer.appendChild(equationDiv);
 
-        if (d < 0) {
-          const altAnswerDiv = document.createElement('div');
-          altAnswerDiv.classList.add('congratulations');
-          altAnswerDiv.textContent = `${-d} = x → x = ${d}`;
-          equationContainer.appendChild(altAnswerDiv);
-        }
-
         const congratsDiv = document.createElement('div');
         congratsDiv.classList.add('congratulations');
         congratsDiv.textContent = 'Congratulations! You have solved the equation. Refresh the page for a new equation.';
         equationContainer.appendChild(congratsDiv);
+      } else if ((a === 0 && b !== 0) || (c === 0 && d !== 0)) {
+        if (b !== 0 && c === 0) {
+          const equationContainer = document.getElementById('equation-container');
+          const equationDiv = document.createElement('div');
+          equationDiv.classList.add('equation');
+          equationDiv.textContent = `x = ${-b}`;
+          equationContainer.appendChild(equationDiv);
+
+          const congratsDiv = document.createElement('div');
+          congratsDiv.classList.add('congratulations');
+          congratsDiv.textContent = 'Congratulations! You have solved the equation. Refresh the page for a new equation.';
+          equationContainer.appendChild(congratsDiv);
+        } else if (b === 0 && d !== 0) {
+          const equationContainer = document.getElementById('equation-container');
+          const equationDiv = document.createElement('div');
+          equationDiv.classList.add('equation');
+          equationDiv.textContent = `x = ${d}`;
+          equationContainer.appendChild(equationDiv);
+
+          const congratsDiv = document.createElement('div');
+          congratsDiv.classList.add('congratulations');
+          congratsDiv.textContent = 'Congratulations! You have solved the equation. Refresh the page for a new equation.';
+          equationContainer.appendChild(congratsDiv);
+        }
       } else {
         updateEquation(input);
       }
