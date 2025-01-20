@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equation Solver Game</title>
+  <title>Equation Solver</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,15 +15,16 @@
       margin: 10px 0;
       text-align: center;
       font-size: 1.5rem;
-    }
-    .input-row {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 10px 0;
+    }
+    .input-row {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 10px;
     }
     input[type="text"] {
-      margin-left: 10px;
       padding: 5px;
       font-size: 1rem;
     }
@@ -41,7 +42,7 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">Equation Solver Game</h1>
+  <h1 style="text-align: center;">Equation Solver</h1>
   <div id="equation-container"></div>
   <div id="message" class="message"></div>
 
@@ -49,26 +50,38 @@
     // Utility functions
     const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+    const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+
+    const toFraction = (decimal) => {
+      let denominator = 1;
+      while (Math.abs(decimal * denominator - Math.round(decimal * denominator)) > 1e-10) {
+        denominator *= 10;
+      }
+      const numerator = Math.round(decimal * denominator);
+      const divisor = gcd(numerator, denominator);
+      return `${numerator / divisor}/${denominator / divisor}`;
+    };
+
     const formatEquation = (a, b, c, d) => {
       const formatTerm = (coef, variable) => {
         if (coef === 0) return '';
         if (coef === 1) return variable;
-        if (coef === -1) return `-${variable}`;
-        return `${coef}${variable}`;
+        if (coef === -1) return `- ${variable}`;
+        return `${coef > 0 ? '' : '- '}${Math.abs(coef)}${variable}`;
       };
 
-      const left = [formatTerm(a, 'x'), b !== 0 ? `${b > 0 ? '+ ' : ''}${b}` : ''].filter(Boolean).join(' ');
-      const right = [formatTerm(c, 'x'), d !== 0 ? `${d > 0 ? '+ ' : ''}${d}` : ''].filter(Boolean).join(' ');
+      const left = [formatTerm(a, 'x'), b !== 0 ? `${b > 0 ? '+ ' : '- '}${Math.abs(b)}` : ''].filter(Boolean).join(' ');
+      const right = [formatTerm(c, 'x'), d !== 0 ? `${d > 0 ? '+ ' : '- '}${Math.abs(d)}` : ''].filter(Boolean).join(' ');
 
       return `${left} = ${right}`;
     };
 
     const parseInput = (input) => {
       const standardizedInput = input.replace('/', '÷').replace(/^\+x$/, '+1x').replace(/^-x$/, '-1x');
-      const match = standardizedInput.match(/^([+\-x\u00F7])(\d+|1)?(x?)$/);
+      const match = standardizedInput.match(/^([+\-x\u00F7])(\d+|1)(x?)$/) || standardizedInput.match(/^([x\u00F7])(-\d+)(x?)$/);
       if (!match) return null;
       const [, operator, value, isVariable] = match;
-      return { operator, value: value ? parseInt(value, 10) : 1, isVariable: isVariable === 'x' };
+      return { operator, value: parseFloat(value), isVariable: isVariable === 'x' };
     };
 
     // Game state
@@ -82,7 +95,7 @@
       updateEquation();
     };
 
-    const updateEquation = (operation = '') => {
+    const updateEquation = (operation = '', previousInput = '') => {
       const equationContainer = document.getElementById('equation-container');
       const message = document.getElementById('message');
 
@@ -90,8 +103,13 @@
 
       const equationDiv = document.createElement('div');
       equationDiv.classList.add('equation');
-      equationDiv.textContent = formatEquation(a, b, c, d) + (operation ? ` (after ${operation})` : '');
-      equationContainer.appendChild(equationDiv);
+      equationDiv.innerHTML = `${formatEquation(a, b, c, d)}`;
+      if (previousInput) {
+        const userInput = document.createElement('span');
+        userInput.textContent = ` (${previousInput})`;
+        userInput.style.marginLeft = '10px';
+        equationDiv.appendChild(userInput);
+      }
 
       const inputRow = document.createElement('div');
       inputRow.classList.add('input-row');
@@ -104,11 +122,12 @@
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           handleInput(input.value);
-          input.value = '';
+          inputRow.removeChild(input);
         }
       });
 
-      equationContainer.appendChild(inputRow);
+      equationDiv.appendChild(inputRow);
+      equationContainer.appendChild(equationDiv);
     };
 
     const handleInput = (input) => {
