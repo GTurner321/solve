@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equation Solver Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+    }
+    .equation {
+      margin: 10px 0;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+    input[type="text"] {
+      margin-left: 10px;
+      padding: 5px;
+      font-size: 1rem;
+    }
+    button {
+      margin-left: 10px;
+      padding: 5px 10px;
+      font-size: 1rem;
+    }
+    .message {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Equation Solver Game</h1>
+  <div id="equation-container"></div>
+  <div id="message" class="message"></div>
+
+  <script>
+    // Utility functions
+    const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    const formatEquation = (a, b, c, d) => {
+      const formatTerm = (coef, variable) => {
+        if (coef === 0) return '';
+        if (coef === 1) return variable;
+        if (coef === -1) return `-${variable}`;
+        return `${coef}${variable}`;
+      };
+
+      const left = [formatTerm(a, 'x'), b !== 0 ? `${b > 0 ? '+ ' : ''}${b}` : ''].filter(Boolean).join(' ');
+      const right = [formatTerm(c, 'x'), d !== 0 ? `${d > 0 ? '+ ' : ''}${d}` : ''].filter(Boolean).join(' ');
+
+      return `${left} = ${right}`;
+    };
+
+    const parseInput = (input) => {
+      const match = input.match(/^([+\-x\u00F7])(\d+)(x?)$/);
+      if (!match) return null;
+      const [, operator, value, isVariable] = match;
+      return { operator, value: parseInt(value, 10), isVariable: isVariable === 'x' };
+    };
+
+    // Game state
+    let a, b, c, d;
+
+    const resetEquation = () => {
+      a = randomInt(1, 10);
+      b = randomInt(1, 10);
+      c = randomInt(1, 10);
+      d = randomInt(1, 10);
+      updateEquation();
+    };
+
+    const updateEquation = () => {
+      const equationContainer = document.getElementById('equation-container');
+      const message = document.getElementById('message');
+
+      equationContainer.innerHTML = '';
+      message.textContent = '';
+
+      const equationDiv = document.createElement('div');
+      equationDiv.classList.add('equation');
+      equationDiv.textContent = formatEquation(a, b, c, d);
+      equationContainer.appendChild(equationDiv);
+
+      const inputRow = document.createElement('div');
+      inputRow.classList.add('input-row');
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Enter operation (e.g., +2, -3x)';
+      inputRow.appendChild(input);
+
+      const button = document.createElement('button');
+      button.textContent = 'Submit';
+      inputRow.appendChild(button);
+
+      equationContainer.appendChild(inputRow);
+
+      button.addEventListener('click', () => handleInput(input.value));
+    };
+
+    const handleInput = (input) => {
+      const parsed = parseInput(input);
+      const message = document.getElementById('message');
+
+      if (!parsed) {
+        message.textContent = 'Try again';
+        return;
+      }
+
+      const { operator, value, isVariable } = parsed;
+      message.textContent = '';
+
+      if (isVariable) {
+        if (operator === 'x' || operator === '\u00F7') {
+          message.textContent = 'This is not supported, try again';
+          return;
+        }
+        if (operator === '+') {
+          a += value;
+          c += value;
+        } else if (operator === '-') {
+          a -= value;
+          c -= value;
+        }
+      } else {
+        if (operator === '+') {
+          b += value;
+          d += value;
+        } else if (operator === '-') {
+          b -= value;
+          d -= value;
+        } else if (operator === 'x') {
+          a *= value;
+          b *= value;
+          c *= value;
+          d *= value;
+        } else if (operator === '\u00F7') {
+          a /= value;
+          b /= value;
+          c /= value;
+          d /= value;
+        }
+      }
+
+      if (a === 1 && b === 0 && c === 0) {
+        const equationContainer = document.getElementById('equation-container');
+        equationContainer.innerHTML += `<div class="equation">x = ${d}</div>`;
+        equationContainer.innerHTML += `<div class="equation">Congratulations! You have solved the equation. Refresh the page for a new equation.</div>`;
+      } else {
+        updateEquation();
+      }
+    };
+
+    resetEquation();
+  </script>
+</body>
+</html>
