@@ -9,12 +9,16 @@
       font-family: Arial, sans-serif;
       margin: 20px;
       padding: 0;
+      background-color: #e6ffe6;
     }
     .equation {
       margin: 10px 0;
+      text-align: center;
+      font-size: 1.5rem;
     }
     .input-row {
       display: flex;
+      justify-content: center;
       align-items: center;
       margin: 10px 0;
     }
@@ -23,19 +27,21 @@
       padding: 5px;
       font-size: 1rem;
     }
-    button {
-      margin-left: 10px;
-      padding: 5px 10px;
-      font-size: 1rem;
-    }
     .message {
       color: red;
       font-weight: bold;
+      text-align: center;
+    }
+    .congratulations {
+      color: green;
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.5rem;
     }
   </style>
 </head>
 <body>
-  <h1>Equation Solver Game</h1>
+  <h1 style="text-align: center;">Equation Solver Game</h1>
   <div id="equation-container"></div>
   <div id="message" class="message"></div>
 
@@ -58,10 +64,11 @@
     };
 
     const parseInput = (input) => {
-      const match = input.match(/^([+\-x\u00F7])(\d+)(x?)$/);
+      const standardizedInput = input.replace('/', '÷').replace(/^\+x$/, '+1x').replace(/^-x$/, '-1x');
+      const match = standardizedInput.match(/^([+\-x\u00F7])(\d+|1)?(x?)$/);
       if (!match) return null;
       const [, operator, value, isVariable] = match;
-      return { operator, value: parseInt(value, 10), isVariable: isVariable === 'x' };
+      return { operator, value: value ? parseInt(value, 10) : 1, isVariable: isVariable === 'x' };
     };
 
     // Game state
@@ -75,16 +82,15 @@
       updateEquation();
     };
 
-    const updateEquation = () => {
+    const updateEquation = (operation = '') => {
       const equationContainer = document.getElementById('equation-container');
       const message = document.getElementById('message');
 
-      equationContainer.innerHTML = '';
       message.textContent = '';
 
       const equationDiv = document.createElement('div');
       equationDiv.classList.add('equation');
-      equationDiv.textContent = formatEquation(a, b, c, d);
+      equationDiv.textContent = formatEquation(a, b, c, d) + (operation ? ` (after ${operation})` : '');
       equationContainer.appendChild(equationDiv);
 
       const inputRow = document.createElement('div');
@@ -95,13 +101,14 @@
       input.placeholder = 'Enter operation (e.g., +2, -3x)';
       inputRow.appendChild(input);
 
-      const button = document.createElement('button');
-      button.textContent = 'Submit';
-      inputRow.appendChild(button);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          handleInput(input.value);
+          input.value = '';
+        }
+      });
 
       equationContainer.appendChild(inputRow);
-
-      button.addEventListener('click', () => handleInput(input.value));
     };
 
     const handleInput = (input) => {
@@ -150,10 +157,17 @@
 
       if (a === 1 && b === 0 && c === 0) {
         const equationContainer = document.getElementById('equation-container');
-        equationContainer.innerHTML += `<div class="equation">x = ${d}</div>`;
-        equationContainer.innerHTML += `<div class="equation">Congratulations! You have solved the equation. Refresh the page for a new equation.</div>`;
+        const equationDiv = document.createElement('div');
+        equationDiv.classList.add('equation');
+        equationDiv.textContent = `x = ${d}`;
+        equationContainer.appendChild(equationDiv);
+
+        const congratsDiv = document.createElement('div');
+        congratsDiv.classList.add('congratulations');
+        congratsDiv.textContent = 'Congratulations! You have solved the equation. Refresh the page for a new equation.';
+        equationContainer.appendChild(congratsDiv);
       } else {
-        updateEquation();
+        updateEquation(input);
       }
     };
 
