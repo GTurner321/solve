@@ -39,7 +39,6 @@
             if (a !== 0 && b === 0 && c === 0 && d !== 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} = ${d.toFixed(3)}`;
             if (a === 0 && b !== 0 && c !== 0 && d === 0) return `${b.toFixed(3)} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`}`;
             if (a !== 0 && b === 0 && c !== 0 && d === 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`}`;
-            if (a !== 0 && b === 0 && c === 0 && d !== 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} = ${d.toFixed(3)}`;
             if (a !== 0 && b !== 0 && c === 0 && d === 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} + ${b.toFixed(3)} = 0`;
             if (a === 0 && b !== 0 && c !== 0 && d === 0) return `${b.toFixed(3)} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`}`;
             if (a !== 0 && b === 0 && c !== 0 && d === 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`}`;
@@ -61,48 +60,75 @@
             c = Math.floor(Math.random() * 10) + 1;
         }
 
-        let equationText = formatEquation(a, b, c, d);
-        let newEquation = document.createElement("div");
-        newEquation.className = "equation";
-        newEquation.textContent = equationText;
-        equationContainer.appendChild(newEquation);
+        function createEquationLine() {
+            let equationText = formatEquation(a, b, c, d);
+            let newEquation = document.createElement("div");
+            newEquation.className = "equation";
+            newEquation.textContent = equationText;
+            equationContainer.appendChild(newEquation);
 
-        let inputContainer = document.createElement("div");
-        inputContainer.className = "input-container";
+            let inputContainer = document.createElement("div");
+            inputContainer.className = "input-container";
 
-        let inputBox = document.createElement("input");
-        inputBox.type = "text";
-        inputBox.placeholder = "Enter your operation";
-        inputBox.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                let input = inputBox.value.trim();
-                if (/^[+-xX*]?\d+\.?\d*x?$/.test(input)) {
-                    // Handle valid input logic here
-                    inputBox.disabled = true;
+            let inputBox = document.createElement("input");
+            inputBox.type = "text";
+            inputBox.placeholder = "Enter your operation";
+            inputBox.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    let input = inputBox.value.trim();
+                    if (/^[+-xX*]?\d+\.?\d*x?$/.test(input)) {
+                        inputBox.disabled = true;
 
-                    let message = document.createElement("div");
-                    message.className = "message";
-                    if (input === "x") {
-                        input = "*1"; // Interpret as multiplication by 1
+                        if (input === "x") {
+                            input = "*1"; // Interpret as multiplication by 1
+                        } else if (input === "-x") {
+                            input = "-1x";
+                        } else if (input === "+x") {
+                            input = "+1x";
+                        }
+
+                        let operation = input[0];
+                        let value = parseFloat(input.slice(1));
+
+                        if (operation === "+") {
+                            b += value;
+                            d += value;
+                        } else if (operation === "-") {
+                            b -= value;
+                            d -= value;
+                        } else if (operation === "*" || operation.toLowerCase() === "x") {
+                            a *= value;
+                            b *= value;
+                            c *= value;
+                            d *= value;
+                        } else if (operation === "/") {
+                            a /= value;
+                            b /= value;
+                            c /= value;
+                            d /= value;
+                        } else {
+                            return;
+                        }
+
+                        createEquationLine();
+                        updateCursorFocus(document.querySelector("input:not([disabled])"));
+                    } else {
+                        let message = document.createElement("div");
+                        message.className = "message";
+                        message.textContent = "Try again";
+                        equationContainer.appendChild(message);
+                        updateCursorFocus(inputBox);
                     }
-
-                    if (input === "-x") {
-                        input = "-1x";
-                    } else if (input === "+x") {
-                        input = "+1x";
-                    }
-
-                    // Adjust equation
-                    let operation = input[0];
-                    let value = parseFloat(input.slice(1));
-                    if (operation === "*") {
-                        a *= value;
-                        b *= value;
-                        c *= value;
-                        d *= value;
-                    }
-                    newEquation.text = formatEquation();
-                    updateCursorFocus=([inputBUOX!!!]);
-
                 }
-}}}.
+            });
+
+            inputContainer.appendChild(inputBox);
+            equationContainer.appendChild(inputContainer);
+
+            updateCursorFocus(inputBox);
+        }
+
+        createEquationLine();
+    </script>
+</body>
+</html>
