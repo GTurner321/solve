@@ -3,178 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equation Solver Game</title>
+    <title>Equation Solver</title>
     <style>
         body {
             background-color: lightgreen;
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
         }
-
         .equation {
-            font-size: 28px;
-            margin: 10px 0;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .input-container {
             display: flex;
-            justify-content: center;
             align-items: center;
+            margin-bottom: 10px;
         }
-
-        .user-input {
-            margin-left: 50px;
+        .input-container input {
+            margin-left: 5em;
         }
-
         .message {
             color: orange;
-            font-size: 18px;
-            margin: 10px 0;
+            margin-bottom: 10px;
         }
-
         .success {
             color: green;
-            font-size: 24px;
-            margin: 20px 0;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Equation Solver Game</h1>
-    <div id="equations-container"></div>
+    <div id="equations"></div>
     <script>
-        // Utility functions
-        function randomNumber(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
         function formatEquation(a, b, c, d) {
-            if (a === 0 && b !== 0 && c !== 0 && d !== 0) return `${b}=${c === 1 ? "" : c === -1 ? "-" : c}x${d >= 0 ? "+" : ""}${d}`;
-            if (c === 0 && a !== 0 && b !== 0 && d !== 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x${b >= 0 ? "+" : ""}${b}=${d}`;
-            if (a !== 0 && c !== 0 && d !== 0 && b === 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x=${c === 1 ? "" : c === -1 ? "-" : c}x${d >= 0 ? "+" : ""}${d}`;
-            if (a !== 0 && b !== 0 && c !== 0 && d === 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x${b >= 0 ? "+" : ""}${b}=${c === 1 ? "" : c === -1 ? "-" : c}x`;
-            if (a === 0 && b === 0 && c !== 0 && d !== 0) return `0=${c === 1 ? "" : c === -1 ? "-" : c}x${d >= 0 ? "+" : ""}${d}`;
-            if (c === 0 && d === 0 && a !== 0 && b !== 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x${b >= 0 ? "+" : ""}${b}=0`;
-            if (a === 0 && b === 0 && c === 0 && d !== 0) return `0=${d}`;
-            if (a === 0 && b === 0 && d === 0 && c !== 0) return `0=${c === 1 ? "" : c === -1 ? "-" : c}x`;
-            if (a === 0 && c === 0 && d === 0 && b !== 0) return `${b}=0`;
-            if (a !== 0 && b === 0 && c === 0 && d === 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x=0`;
-            if (a === 0 && b === 0 && c === 0 && d === 0) return `0=0`;
-
-            let left = `${a === 1 ? "" : a === -1 ? "-" : a}x${b >= 0 ? "+" : ""}${b}`;
-            let right = `${c === 1 ? "" : c === -1 ? "-" : c}x${d >= 0 ? "+" : ""}${d}`;
-            return `${left}=${right}`.replace("+-", "-");
+            // Format rules based on conditions
+            if (a !== 0 && b === 0 && c === 0 && d !== 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} = ${d.toFixed(3)}`;
+            if (a === 0 && b !== 0 && c !== 0 && d === 0) return `${b.toFixed(3)} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`}`;
+            if (a !== 0 && b === 0 && c !== 0 && d === 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`}`;
+            if (a !== 0 && b === 0 && c === 0 && d !== 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} = ${d.toFixed(3)}`;
+            if (a !== 0 && b !== 0 && c === 0 && d === 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} + ${b.toFixed(3)} = 0`;
+            if (a === 0 && b !== 0 && c !== 0 && d === 0) return `${b.toFixed(3)} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`}`;
+            if (a !== 0 && b === 0 && c !== 0 && d === 0) return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`}`;
+            return `${a === 1 ? "x" : a === -1 ? "-x" : `${a}x`} + ${b.toFixed(3)} = ${c === 1 ? "x" : c === -1 ? "-x" : `${c}x`} + ${d.toFixed(3)}`;
         }
 
-        function applyOperation(input, a, b, c, d) {
-            let op = input[0];
-            let rest = input.slice(1);
-            if (rest === "x") rest = "1x";
-            if (input === "x") {
-                op = "*";
-                rest = "1";
-            }
-            let num = parseFloat(rest.replace("x", ""));
-            let hasX = rest.includes("x");
+        function updateCursorFocus(inputElement) {
+            setTimeout(() => {
+                inputElement.focus();
+            }, 0);
+        }
 
-            if (isNaN(num)) {
-                return { message: "Try again", error: true };
-            }
+        let equationContainer = document.getElementById("equations");
+        let a = Math.floor(Math.random() * 10) + 1;
+        let b = Math.floor(Math.random() * 10) + 1;
+        let c = Math.floor(Math.random() * 10) + 1;
+        let d = Math.floor(Math.random() * 10) + 1;
+        while (a === c) {
+            c = Math.floor(Math.random() * 10) + 1;
+        }
 
-            switch (op) {
-                case "+":
-                case "-":
-                    if (!hasX) {
-                        b = eval(`${b}${op}${num}`);
-                        d = eval(`${d}${op}${num}`);
-                    } else {
-                        a = eval(`${a}${op}${num}`);
-                        c = eval(`${c}${op}${num}`);
+        let equationText = formatEquation(a, b, c, d);
+        let newEquation = document.createElement("div");
+        newEquation.className = "equation";
+        newEquation.textContent = equationText;
+        equationContainer.appendChild(newEquation);
+
+        let inputContainer = document.createElement("div");
+        inputContainer.className = "input-container";
+
+        let inputBox = document.createElement("input");
+        inputBox.type = "text";
+        inputBox.placeholder = "Enter your operation";
+        inputBox.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                let input = inputBox.value.trim();
+                if (/^[+-xX*]?\d+\.?\d*x?$/.test(input)) {
+                    // Handle valid input logic here
+                    inputBox.disabled = true;
+
+                    let message = document.createElement("div");
+                    message.className = "message";
+                    if (input === "x") {
+                        input = "*1"; // Interpret as multiplication by 1
                     }
-                    break;
-                case "x":
-                case "*":
-                case "/":
-                    if (hasX) {
-                        return { message: "This is not supported, try again", error: true };
-                    } else {
-                        a = eval(`${a}${op}${num}`);
-                        b = eval(`${b}${op}${num}`);
-                        c = eval(`${c}${op}${num}`);
-                        d = eval(`${d}${op}${num}`);
+
+                    if (input === "-x") {
+                        input = "-1x";
+                    } else if (input === "+x") {
+                        input = "+1x";
                     }
-                    break;
-                default:
-                    return { message: "Try again", error: true };
-            }
 
-            return { a, b, c, d, error: false };
-        }
-
-        function checkEndState(a, b, c, d) {
-            if (a === 1 && b === 0 && c === 0) return `x=${d}`;
-            if (a === 0 && c === 1 && d === 0) return `x=${b}`;
-            return null;
-        }
-
-        // Initialization
-        let a, b, c, d;
-        do {
-            a = randomNumber(1, 10) * (Math.random() < 0.5 ? -1 : 1);
-            b = randomNumber(1, 10) * (Math.random() < 0.5 ? -1 : 1);
-            c = randomNumber(1, 10) * (Math.random() < 0.5 ? -1 : 1);
-            d = randomNumber(1, 10) * (Math.random() < 0.5 ? -1 : 1);
-        } while (a === c);
-
-        let equationsContainer = document.getElementById("equations-container");
-
-        function addEquationLine(equation, isError = false, message = "") {
-            const div = document.createElement("div");
-            div.className = "equation";
-            div.innerHTML = `${equation}`;
-
-            const inputBox = document.createElement("input");
-            inputBox.type = "text";
-            inputBox.className = "user-input";
-            inputBox.placeholder = "Enter operation...";
-            if (isError) {
-                const msgDiv = document.createElement("div");
-                msgDiv.className = "message";
-                msgDiv.innerText = message;
-                div.appendChild(msgDiv);
-            } else {
-                inputBox.addEventListener("keydown", function (e) {
-                    if (e.key === "Enter") {
-                        const result = applyOperation(inputBox.value, a, b, c, d);
-
-                        if (result.error) {
-                            addEquationLine(equation, true, result.message);
-                        } else {
-                            a = result.a;
-                            b = result.b;
-                            c = result.c;
-                            d = result.d;
-
-                            const endState = checkEndState(a, b, c, d);
-                            if (endState) {
-                                addEquationLine(endState);
-                                const successMessage = document.createElement("div");
-                                successMessage.className = "success";
-                                successMessage.innerHTML = "Congratulations! You have solved the equation!";
-                                equationsContainer.appendChild(successMessage);
-                            } else {
-                                addEquationLine(formatEquation(a, b, c, d));
-                            }
-                        }
-
-                        inputBox.disabled = true;
+                    // Adjust equation
+                    let operation = input[0];
+                    let value = parseFloat(input.slice(1));
+                    if (operation === "*") {
+                        a *= value;
+                        b *= value;
+                        c *= value;
+                        d *= value;
                     }
-                });
-            }
+                    newEquation.text = formatEquation();
+                    updateCursorFocus=([inputBUOX!!!]);
 
-            if (!isError) div.appendChild(inputBox);
-            equationsContainer.appendChild(div);
-        }
-
-        addEquationLine(formatEquation(a, b, c, d));
-    </script>
-</body>
-</html>
+                }
+}}}.
