@@ -8,151 +8,167 @@
         body {
             background-color: lightgreen;
             font-family: Arial, sans-serif;
+            text-align: center;
         }
+
         .equation {
-            font-size: 2em;
-            margin: 10px 0;
-        }
-        .input-row {
-            display: flex;
-            align-items: center;
+            font-size: 24px;
             margin-bottom: 10px;
         }
+
         .input-box {
-            margin-left: 50px; /* Adds 5 spaces worth of spacing */
+            margin-left: 50px;
         }
+
         .message {
             color: orange;
-            font-weight: bold;
+            font-size: 20px;
         }
+
         .success {
             color: green;
-            font-weight: bold;
+            font-size: 24px;
+        }
+
+        input[type="text"] {
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <div id="game">
-        <div id="equations"></div>
-        <div id="message"></div>
-    </div>
+    <div id="game"></div>
 
     <script>
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
         function formatNumber(num) {
-            return Math.round(num * 1000) / 1000; // Limit to 3 decimal places
+            return parseFloat(num.toFixed(3));
         }
 
         function generateEquation() {
-            let a = Math.floor(Math.random() * 10) + 1;
-            let b = Math.floor(Math.random() * 21) - 10;
-            let c = Math.floor(Math.random() * 10) + 1;
-            let d = Math.floor(Math.random() * 21) - 10;
-
-            while (a === c) {
-                c = Math.floor(Math.random() * 10) + 1;
-            }
-
+            let a, c;
+            do {
+                a = randomInt(1, 10);
+                c = randomInt(1, 10);
+            } while (a === c);
+            const b = randomInt(1, 10);
+            const d = randomInt(1, 10);
             return { a, b, c, d };
         }
 
         function formatEquation({ a, b, c, d }) {
-            let equation = "";
-
-            if (a !== 0 && c !== 0 && b === 0 && d === 0) {
-                equation = `${formatNumber(a)}x=${formatNumber(c)}x`;
-            } else if (a !== 0 && d !== 0 && b === 0 && c === 0) {
-                equation = `${formatNumber(a)}x=${formatNumber(d)}`;
-            } else if (b !== 0 && c !== 0 && a === 0 && d === 0) {
-                equation = `${formatNumber(b)}=${formatNumber(c)}x`;
-            } else if (a !== 0 && c !== 0 && d !== 0 && b === 0) {
-                equation = `${formatNumber(a)}x=${formatNumber(c)}x+${formatNumber(d)}`;
-            } else {
-                equation = `${formatNumber(a)}x+${formatNumber(b)}=${formatNumber(c)}x+${formatNumber(d)}`;
-            }
-
-            return equation.replace(/\+\-/g, "-");
+            const formatted = `${a !== 1 ? a : ''}x${b >= 0 ? '+' : ''}${b} = ${c !== 1 ? c : ''}x${d >= 0 ? '+' : ''}${d}`;
+            return formatted.replace(/\+\-/g, '-');
         }
 
-        function createInputBox(onInputCallback) {
-            const input = document.createElement("input");
-            input.type = "text";
-            input.className = "input-box";
-            input.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    onInputCallback(input.value);
+        function evaluateOperation(equation, operation) {
+            let { a, b, c, d } = equation;
+
+            if (/^[+\-]?x$/.test(operation)) {
+                operation = operation.replace('x', '1x');
+            }
+
+            if (/^[+\-]\d+x$/.test(operation)) {
+                const value = parseFloat(operation.replace(/[+\-]/, ''));
+                a += value;
+                c += value;
+            } else if (/^[+\-]\d+$/.test(operation)) {
+                const value = parseFloat(operation);
+                b += value;
+                d += value;
+            } else if (/^[x*]\d+$/.test(operation)) {
+                const value = parseFloat(operation.replace(/x|\*/, ''));
+                a *= value;
+                b *= value;
+                c *= value;
+                d *= value;
+            } else if (/^[\/÷]\d+$/.test(operation)) {
+                const value = parseFloat(operation.replace(/[\/÷]/, ''));
+                a /= value;
+                b /= value;
+                c /= value;
+                d /= value;
+            } else {
+                return null;
+            }
+
+            return {
+                a: formatNumber(a),
+                b: formatNumber(b),
+                c: formatNumber(c),
+                d: formatNumber(d),
+            };
+        }
+
+        function checkSolved(equation) {
+            const { a, b, c, d } = equation;
+            if (a === 1 && b === 0 && c === 0) {
+                return `x=${d}`;
+            } else if (a === 0 && c === 1 && d === 0) {
+                return `${b}=x`;
+            }
+            return false;
+        }
+
+        function updateGame() {
+            const inputBoxes = document.querySelectorAll('.input-box');
+            inputBoxes.forEach(box => box.disabled = true);
+            const currentEquation = equations[equations.length - 1];
+            const userOperation = inputBoxes[inputBoxes.length - 1].value;
+            const newEquation = evaluateOperation(currentEquation, userOperation);
+
+            if (newEquation) {
+                equations.push(newEquation);
+                const solved = checkSolved(newEquation);
+                if (solved) {
+                    const success = document.createElement('div');
+                    success.textContent = `Congratulations! You have solved the equation: ${solved}`;
+                    success.className = 'success';
+                    game.appendChild(success);
+                    return;
+                } else {
+                    addEquationLine(newEquation);
+                }
+            } else {
+                const message = document.createElement('div');
+                message.textContent = 'Invalid input, try again';
+                message.className = 'message';
+                game.appendChild(message);
+                const lastBox = inputBoxes[inputBoxes.length - 1];
+                lastBox.disabled = false;
+                lastBox.focus();
+            }
+        }
+
+        function addEquationLine(equation) {
+            const line = document.createElement('div');
+            line.className = 'equation';
+            line.textContent = formatEquation(equation);
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'input-box';
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    updateGame();
                 }
             });
-            setTimeout(() => input.focus(), 0); // Auto-focus the input box
-            return input;
+
+            const container = document.createElement('div');
+            container.appendChild(line);
+            container.appendChild(input);
+            game.appendChild(container);
+            input.focus();
         }
 
-        function createEquationElement(equationText) {
-            const div = document.createElement("div");
-            div.className = "equation";
-            div.textContent = equationText;
-            return div;
-        }
+        const equations = [];
+        const game = document.getElementById('game');
 
-        function createMessageElement(message, className) {
-            const div = document.createElement("div");
-            div.className = className;
-            div.textContent = message;
-            return div;
-        }
-
-        const game = (() => {
-            let state = generateEquation();
-            const equationsDiv = document.getElementById("equations");
-            const messageDiv = document.getElementById("message");
-
-            function updateGame(input) {
-                messageDiv.innerHTML = "";
-                input = input.trim();
-
-                if (input === "x") input = "*";
-                if (input === "+x") input = "+1x";
-                if (input === "-x") input = "-1x";
-
-                const match = input.match(/^([+\-*/])(\d+(\.\d+)?)(x?)$/);
-                if (!match) {
-                    messageDiv.appendChild(createMessageElement("Try again", "message"));
-                    return;
-                }
-
-                const [, operator, number, , isX] = match;
-                const num = parseFloat(number);
-
-                if (isX && ["*", "/"].includes(operator)) {
-                    messageDiv.appendChild(createMessageElement("This is not supported, try again", "message"));
-                    return;
-                }
-
-                if (isX) {
-                    if (operator === "+" || operator === "-") {
-                        state.a = eval(`${state.a} ${operator} ${num}`);
-                        state.c = eval(`${state.c} ${operator} ${num}`);
-                    }
-                } else {
-                    if (["+", "-"].includes(operator)) {
-                        state.b = eval(`${state.b} ${operator} ${num}`);
-                        state.d = eval(`${state.d} ${operator} ${num}`);
-                    } else {
-                        state.a = eval(`${state.a} ${operator} ${num}`);
-                        state.b = eval(`${state.b} ${operator} ${num}`);
-                        state.c = eval(`${state.c} ${operator} ${num}`);
-                        state.d = eval(`${state.d} ${operator} ${num}`);
-                    }
-                }
-
-                equationsDiv.appendChild(createEquationElement(formatEquation(state)));
-                const newInput = createInputBox(updateGame);
-                equationsDiv.appendChild(newInput);
-            }
-
-            equationsDiv.appendChild(createEquationElement(formatEquation(state)));
-            const initialInput = createInputBox(updateGame);
-            equationsDiv.appendChild(initialInput);
-        })();
+        const initialEquation = generateEquation();
+        equations.push(initialEquation);
+        addEquationLine(initialEquation);
     </script>
 </body>
 </html>
