@@ -23,7 +23,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            justify-content: center;
+            justify-content: flex-start;
         }
 
         .input-container input {
@@ -100,7 +100,7 @@
             else if (cmd.startsWith('/') || cmd.startsWith('÷')) n = parseFloat(cmd.slice(1));
 
             if (cmd.startsWith('+x') || cmd === '+x' || cmd.startsWith('-x') || cmd === '-x') {
-                return { a, b: b + n, c, d: d + n };
+                return { a: a + n, b, c: c + n, d };
             } else if (cmd.startsWith('+') || cmd.startsWith('-')) {
                 return { a, b: b + n, c, d: d + n };
             } else if (cmd.startsWith('*') || cmd.startsWith('x')) {
@@ -152,6 +152,7 @@
             inputDiv.appendChild(input);
             inputDiv.appendChild(errorMsg);
             container.appendChild(inputDiv);
+            input.focus(); // Automatically move cursor to the new input box
         }
 
         function main() {
