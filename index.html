@@ -13,12 +13,15 @@
         }
 
         .equation {
-            font-size: 24px;
+            font-size: 28px;
             margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .user-input {
-            margin: 10px 0;
+            margin-left: 50px;
         }
 
         .message {
@@ -44,6 +47,18 @@
         }
 
         function formatEquation(a, b, c, d) {
+            if (a === 0 && b !== 0 && c !== 0 && d !== 0) return `${b}=${c === 1 ? "" : c === -1 ? "-" : c}x${d >= 0 ? "+" : ""}${d}`;
+            if (c === 0 && a !== 0 && b !== 0 && d !== 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x${b >= 0 ? "+" : ""}${b}=${d}`;
+            if (a !== 0 && c !== 0 && d !== 0 && b === 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x=${c === 1 ? "" : c === -1 ? "-" : c}x${d >= 0 ? "+" : ""}${d}`;
+            if (a !== 0 && b !== 0 && c !== 0 && d === 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x${b >= 0 ? "+" : ""}${b}=${c === 1 ? "" : c === -1 ? "-" : c}x`;
+            if (a === 0 && b === 0 && c !== 0 && d !== 0) return `0=${c === 1 ? "" : c === -1 ? "-" : c}x${d >= 0 ? "+" : ""}${d}`;
+            if (c === 0 && d === 0 && a !== 0 && b !== 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x${b >= 0 ? "+" : ""}${b}=0`;
+            if (a === 0 && b === 0 && c === 0 && d !== 0) return `0=${d}`;
+            if (a === 0 && b === 0 && d === 0 && c !== 0) return `0=${c === 1 ? "" : c === -1 ? "-" : c}x`;
+            if (a === 0 && c === 0 && d === 0 && b !== 0) return `${b}=0`;
+            if (a !== 0 && b === 0 && c === 0 && d === 0) return `${a === 1 ? "" : a === -1 ? "-" : a}x=0`;
+            if (a === 0 && b === 0 && c === 0 && d === 0) return `0=0`;
+
             let left = `${a === 1 ? "" : a === -1 ? "-" : a}x${b >= 0 ? "+" : ""}${b}`;
             let right = `${c === 1 ? "" : c === -1 ? "-" : c}x${d >= 0 ? "+" : ""}${d}`;
             return `${left}=${right}`.replace("+-", "-");
@@ -52,6 +67,11 @@
         function applyOperation(input, a, b, c, d) {
             let op = input[0];
             let rest = input.slice(1);
+            if (rest === "x") rest = "1x";
+            if (input === "x") {
+                op = "*";
+                rest = "1";
+            }
             let num = parseFloat(rest.replace("x", ""));
             let hasX = rest.includes("x");
 
@@ -105,7 +125,6 @@
         } while (a === c);
 
         let equationsContainer = document.getElementById("equations-container");
-        let equationIndex = 0;
 
         function addEquationLine(equation, isError = false, message = "") {
             const div = document.createElement("div");
@@ -116,43 +135,42 @@
             inputBox.type = "text";
             inputBox.className = "user-input";
             inputBox.placeholder = "Enter operation...";
-            inputBox.disabled = isError;
-            inputBox.addEventListener("keydown", function (e) {
-                if (e.key === "Enter") {
-                    const result = applyOperation(inputBox.value, a, b, c, d);
-
-                    if (result.error) {
-                        addEquationLine(equation, true, result.message);
-                    } else {
-                        a = result.a;
-                        b = result.b;
-                        c = result.c;
-                        d = result.d;
-
-                        const endState = checkEndState(a, b, c, d);
-                        if (endState) {
-                            addEquationLine(endState);
-                            const successMessage = document.createElement("div");
-                            successMessage.className = "success";
-                            successMessage.innerHTML = "Congratulations! You have solved the equation!";
-                            equationsContainer.appendChild(successMessage);
-                        } else {
-                            addEquationLine(formatEquation(a, b, c, d));
-                        }
-                    }
-
-                    inputBox.disabled = true;
-                }
-            });
-
-            if (!isError) div.appendChild(inputBox);
-            if (message) {
+            if (isError) {
                 const msgDiv = document.createElement("div");
                 msgDiv.className = "message";
                 msgDiv.innerText = message;
                 div.appendChild(msgDiv);
+            } else {
+                inputBox.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter") {
+                        const result = applyOperation(inputBox.value, a, b, c, d);
+
+                        if (result.error) {
+                            addEquationLine(equation, true, result.message);
+                        } else {
+                            a = result.a;
+                            b = result.b;
+                            c = result.c;
+                            d = result.d;
+
+                            const endState = checkEndState(a, b, c, d);
+                            if (endState) {
+                                addEquationLine(endState);
+                                const successMessage = document.createElement("div");
+                                successMessage.className = "success";
+                                successMessage.innerHTML = "Congratulations! You have solved the equation!";
+                                equationsContainer.appendChild(successMessage);
+                            } else {
+                                addEquationLine(formatEquation(a, b, c, d));
+                            }
+                        }
+
+                        inputBox.disabled = true;
+                    }
+                });
             }
 
+            if (!isError) div.appendChild(inputBox);
             equationsContainer.appendChild(div);
         }
 
