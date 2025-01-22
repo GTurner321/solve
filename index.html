@@ -9,6 +9,7 @@
       font-family: Arial, sans-serif;
       margin: 20px;
       padding: 20px;
+      background-color: lightblue;
     }
     .equation {
       font-size: 24px;
@@ -48,15 +49,15 @@
     function formatEquation(a, b, c, d) {
       const parts = [];
 
-      if (a !== 0) parts.push(a === 1 ? "x" : a === -1 ? "-x" : `${a}x`);
-      if (b !== 0) parts.push(b > 0 && a !== 0 ? `+${b}` : `${b}`);
+      if (a !== 0) parts.push(a === 1 ? "x" : a === -1 ? "-x" : `${formatNumber(a)}x`);
+      if (b !== 0) parts.push(b > 0 && a !== 0 ? `+${formatNumber(b)}` : `${formatNumber(b)}`);
       if (parts.length === 0) parts.push("0");
 
       const left = parts.join("");
 
       parts.length = 0;
-      if (c !== 0) parts.push(c === 1 ? "x" : c === -1 ? "-x" : `${c}x`);
-      if (d !== 0) parts.push(d > 0 && c !== 0 ? `+${d}` : `${d}`);
+      if (c !== 0) parts.push(c === 1 ? "x" : c === -1 ? "-x" : `${formatNumber(c)}x`);
+      if (d !== 0) parts.push(d > 0 && c !== 0 ? `+${formatNumber(d)}` : `${formatNumber(d)}`);
       if (parts.length === 0) parts.push("0");
 
       const right = parts.join("");
@@ -97,7 +98,7 @@
         successMessage.textContent = "Well done! You have solved the equation.";
         equationContainer.appendChild(successMessage);
 
-        const solution = a === 1 ? `x = ${d}` : `x = ${b}`;
+        const solution = a === 1 ? `x = ${formatNumber(d)}` : `x = ${formatNumber(b)}`;
         const solutionMessage = document.createElement("div");
         solutionMessage.className = "success-message";
         solutionMessage.textContent = solution;
@@ -146,11 +147,21 @@
 
       if (command.includes("x")) {
         if (operation === "+") {
-          a += value;
-          c += value;
+          if (isNaN(value)) {
+            a += 1;
+            c += 1;
+          } else {
+            a += value;
+            c += value;
+          }
         } else if (operation === "-") {
-          a -= value;
-          c -= value;
+          if (isNaN(value)) {
+            a -= 1;
+            c -= 1;
+          } else {
+            a -= value;
+            c -= value;
+          }
         }
       } else {
         if (operation === "+") {
