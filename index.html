@@ -56,22 +56,26 @@
             return { a, b, c, d };
         }
 
+        function formatNumber(num) {
+            return Number.isInteger(num) ? num : parseFloat(num.toFixed(3));
+        }
+
         function formatEquation(a, b, c, d) {
             let leftSide = '', rightSide = '';
 
             if (a !== 0) {
-                leftSide += (a === 1 ? '' : a === -1 ? '-' : a) + 'x';
+                leftSide += (a === 1 ? '' : a === -1 ? '-' : formatNumber(a)) + 'x';
             }
             if (b !== 0) {
-                leftSide += (b > 0 && a !== 0 ? '+' : '') + (b === 1 ? '' : b === -1 ? '-' : b);
+                leftSide += (b > 0 && a !== 0 ? '+' : '') + (b === 1 ? '' : b === -1 ? '-' : formatNumber(b));
             }
             if (leftSide === '') leftSide = '0';
 
             if (c !== 0) {
-                rightSide += (c === 1 ? '' : c === -1 ? '-' : c) + 'x';
+                rightSide += (c === 1 ? '' : c === -1 ? '-' : formatNumber(c)) + 'x';
             }
             if (d !== 0) {
-                rightSide += (d > 0 && c !== 0 ? '+' : '') + (d === 1 ? '' : d === -1 ? '-' : d);
+                rightSide += (d > 0 && c !== 0 ? '+' : '') + (d === 1 ? '' : d === -1 ? '-' : formatNumber(d));
             }
             if (rightSide === '') rightSide = '0';
 
@@ -80,8 +84,8 @@
 
         function processCommand(command, equation) {
             const { a, b, c, d } = equation;
-            const match = command.match(/([+\-*/]?)(\d*)([x]?)$/);
-            if (!match) return null;
+            const match = command.match(/([+\-*/]?)(-?\d*)([x]?)$/);
+            if (!match || !match[2]) return null;
 
             const operator = match[1];
             const number = match[2] ? parseInt(match[2], 10) : 1;
@@ -101,7 +105,10 @@
                         return { a, b: b - number, c, d: d - number };
                     }
                 case '*':
-                    return { a: a * number, b: b * number, c: c * number, d: d * number };
+                    if (number !== 0) {
+                        return { a: a * number, b: b * number, c: c * number, d: d * number };
+                    }
+                    break;
                 case '/':
                     if (number !== 0) {
                         return { a: a / number, b: b / number, c: c / number, d: d / number };
@@ -136,6 +143,12 @@
                     if (newEquation) {
                         input.disabled = true;
                         updateContent(contentDiv, newEquation);
+                        setTimeout(() => {
+                            const inputs = contentDiv.querySelectorAll('.input-container input');
+                            if (inputs.length > 0) {
+                                inputs[inputs.length - 1].focus();
+                            }
+                        }, 10);
                     } else {
                         const tryAgain = document.createElement('div');
                         tryAgain.className = 'try-again';
@@ -151,7 +164,7 @@
             if ((equation.a === 1 && equation.b === 0 && equation.c === 0) || (equation.a === 0 && equation.c === 1 && equation.d === 0)) {
                 const congratulations = document.createElement('div');
                 congratulations.className = 'congratulations';
-                congratulations.textContent = equation.a === 1 ? `Well done! You have solved the equation. x=${equation.d}` : `Well done! You have solved the equation. x=${equation.b}`;
+                congratulations.textContent = equation.a === 1 ? `Well done! You have solved the equation. x=${formatNumber(equation.d)}` : `Well done! You have solved the equation. x=${formatNumber(equation.b)}`;
                 contentDiv.appendChild(congratulations);
             }
         }
