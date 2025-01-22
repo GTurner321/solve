@@ -16,33 +16,35 @@
             color: black;
             margin: 20px 0;
         }
+        .input-box {
+            margin-left: 20px;
+        }
+        .try-again {
+            color: red;
+        }
         .success {
             font-size: 24px;
             font-weight: bold;
             color: green;
-        }
-        .input-box {
-            margin: 10px 0;
-        }
-        .try-again {
-            color: red;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <h1>Equation Solver</h1>
-    <div id="equations"></div>
+    <div id="equation-container"></div>
+
     <script>
         function generateRandomNumber(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
         function formatEquation(a, b, c, d) {
-            const term = (coefficient, variable) => {
-                if (coefficient === 0) return '';
-                if (coefficient === 1) return variable;
-                if (coefficient === -1) return `-${variable}`;
-                return `${coefficient}${variable}`;
+            const term = (coeff, variable) => {
+                if (coeff === 0) return '';
+                if (coeff === 1) return variable;
+                if (coeff === -1) return `-${variable}`;
+                return `${coeff}${variable}`;
             };
 
             const left = `${term(a, 'x')}${b !== 0 ? (b > 0 ? `+${b}` : b) : ''}`;
@@ -62,78 +64,97 @@
             b = generateRandomNumber(-10, 10);
             d = generateRandomNumber(-10, 10);
 
-            createEquationElement(formatEquation(a, b, c, d));
+            renderEquation();
         }
 
-        const equationsDiv = document.getElementById('equations');
+        function renderEquation(message) {
+            const container = document.getElementById('equation-container');
+            container.innerHTML = '';
 
-        function createEquationElement(equation, liveInput = true, tryAgain = false) {
-            const container = document.createElement('div');
-            container.classList.add('equation-container');
+            const equation = formatEquation(a, b, c, d);
+            const equationDiv = document.createElement('div');
+            equationDiv.className = 'equation';
+            equationDiv.textContent = equation;
 
-            const equationEl = document.createElement('div');
-            equationEl.classList.add('equation');
-            equationEl.textContent = equation;
-            container.appendChild(equationEl);
+            container.appendChild(equationDiv);
 
-            if (liveInput) {
-                const inputBox = document.createElement('input');
-                inputBox.classList.add('input-box');
-                inputBox.type = 'text';
-                inputBox.placeholder = 'Enter a command';
-                container.appendChild(inputBox);
-                inputBox.focus();
-
-                inputBox.addEventListener('keydown', function (event) {
-                    if (event.key === 'Enter') {
-                        handleCommand(inputBox.value, container);
-                    }
-                });
+            if (message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'success';
+                messageDiv.textContent = message;
+                container.appendChild(messageDiv);
+                return;
             }
 
-            if (tryAgain) {
-                const errorEl = document.createElement('div');
-                errorEl.classList.add('try-again');
-                errorEl.textContent = 'Try again';
-                container.appendChild(errorEl);
-            }
+            const input = document.createElement('input');
+            input.className = 'input-box';
+            input.placeholder = 'Enter command';
 
-            equationsDiv.appendChild(container);
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    handleCommand(input.value);
+                }
+            });
+
+            container.appendChild(input);
+            input.focus();
         }
 
-        function handleCommand(command, container) {
+        function handleCommand(command) {
             const validCommand = /^(\+|-|\*|\/)(\d+)|(\+|-)(x|\dx)$/;
 
             if (!validCommand.test(command)) {
-                container.querySelector('.try-again')?.remove();
-                createEquationElement(formatEquation(a, b, c, d), true, true);
+                alert('Invalid command. Try again!');
                 return;
             }
 
             const number = parseFloat(command.match(/\d+/)?.[0] || 1);
-
             if (command.startsWith('+')) {
                 if (command.includes('x')) {
-                    b += number;
-                    d += number;
+                    a += number;
+                    c += number;
                 } else {
                     b += number;
                     d += number;
                 }
             } else if (command.startsWith('-')) {
                 if (command.includes('x')) {
-                    b -= number;
-                    d -= number;
+                    a -= number;
+                    c -= number;
                 } else {
                     b -= number;
                     d -= number;
                 }
+            } else if (command.startsWith('*')) {
+                a *= number;
+                b *= number;
+                c *= number;
+                d *= number;
+            } else if (command.startsWith('/')) {
+                if (number !== 0) {
+                    a /= number;
+                    b /= number;
+                    c /= number;
+                    d /= number;
+                } else {
+                    alert('Division by zero is not allowed!');
+                    return;
+                }
             }
 
-            createEquationElement(formatEquation(a, b, c, d));
+            checkCompletion();
         }
 
-        // Initialize the first equation
+        function checkCompletion() {
+            if (a === 1 && b === 0 && c === 0) {
+                renderEquation('Well done! You have solved the equation. x=' + d);
+            } else if (a === 0 && c === 1 && d === 0) {
+                renderEquation('Well done! You have solved the equation. x=' + b);
+            } else {
+                renderEquation();
+            }
+        }
+
         initializeEquation();
     </script>
 </body>
