@@ -53,13 +53,17 @@
 
         let a, b, c, d;
 
-        do {
-            a = generateRandomNumber(-10, 10);
-            c = generateRandomNumber(-10, 10);
-        } while (a === c);
+        function initializeEquation() {
+            do {
+                a = generateRandomNumber(-10, 10);
+                c = generateRandomNumber(-10, 10);
+            } while (a === c);
 
-        b = generateRandomNumber(-10, 10);
-        d = generateRandomNumber(-10, 10);
+            b = generateRandomNumber(-10, 10);
+            d = generateRandomNumber(-10, 10);
+
+            createEquationElement(formatEquation(a, b, c, d));
+        }
 
         const equationsDiv = document.getElementById('equations');
 
@@ -126,6 +130,11 @@
                 }
             }
 
+            createEquationElement(formatEquation(a, b, c, d));
+        }
 
-
-       }
+        // Initialize the first equation
+        initializeEquation();
+    </script>
+</body>
+</html>
