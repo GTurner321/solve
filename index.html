@@ -15,64 +15,81 @@
       font-size: 24px;
       text-align: center;
       background-color: lightblue;
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 5px;
+      margin-bottom: 5px;
     }
     .input-container {
       display: flex;
+      flex-direction: column;
       align-items: center;
       margin-bottom: 10px;
     }
     .input-box {
-      margin-left: 20px;
+      margin-top: 5px;
+      padding: 5px;
+      font-size: 16px;
+    }
+    .input-box:disabled {
+      background-color: #f0f0f0;
     }
     .error-message {
       color: orange;
-      margin-left: 20px;
+      margin-top: 5px;
     }
     .success-message {
       color: green;
       font-size: 20px;
-      margin-top: 20px;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .new-equation-button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: green;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .new-equation-button:hover {
+      background-color: darkgreen;
     }
   </style>
 </head>
 <body>
   <div id="equation-container"></div>
   <script>
-    // Utility function to format numbers to 3 decimal places if needed
+    // Utility function to format numbers based on rules
     function formatNumber(num) {
-      return Math.abs(num - Math.round(num)) > 0.001 ? num.toFixed(3) : num;
+      return num.toFixed(3).replace(/\.?0+$/, ""); // Up to 3 decimal places, no trailing zeros
     }
 
     // Utility function to format equations
     function formatEquation(a, b, c, d) {
-      const parts = [];
+      const left = [
+        a !== 0 ? `${a === 1 ? "" : a === -1 ? "-" : formatNumber(a)}x` : "",
+        b !== 0 ? `${b > 0 && a !== 0 ? "+" : ""}${formatNumber(b)}` : "",
+      ].join("").trim() || "0";
 
-      if (a !== 0) parts.push(a === 1 ? "x" : a === -1 ? "-x" : `${formatNumber(a)}x`);
-      if (b !== 0) parts.push(b > 0 && a !== 0 ? `+${formatNumber(b)}` : `${formatNumber(b)}`);
-      if (parts.length === 0) parts.push("0");
+      const right = [
+        c !== 0 ? `${c === 1 ? "" : c === -1 ? "-" : formatNumber(c)}x` : "",
+        d !== 0 ? `${d > 0 && c !== 0 ? "+" : ""}${formatNumber(d)}` : "",
+      ].join("").trim() || "0";
 
-      const left = parts.join("");
-
-      parts.length = 0;
-      if (c !== 0) parts.push(c === 1 ? "x" : c === -1 ? "-x" : `${formatNumber(c)}x`);
-      if (d !== 0) parts.push(d > 0 && c !== 0 ? `+${formatNumber(d)}` : `${formatNumber(d)}`);
-      if (parts.length === 0) parts.push("0");
-
-      const right = parts.join("");
       return `${left} = ${right}`;
     }
 
     // Function to validate user input
     function validateInput(input) {
-      return /^[\+\-\*\/](\d+(\.\d+)?|\-\d+(\.\d+)?)$|^[\+\-](\d+(\.\d+)?|\-\d+(\.\d+)?)x$/.test(input);
+      return /^[\+\-\*\/]x?$|^[\+\-\*\/](\d+(\.\d+)?|\-\d+(\.\d+)?)x?$/.test(input);
     }
 
     // Initialize equation parameters
     let a, b, c, d;
 
     function generateEquation() {
+      const equationContainer = document.getElementById("equation-container");
+      equationContainer.innerHTML = ""; // Clear all content
       do {
         a = Math.floor(Math.random() * 21) - 10;
         c = Math.floor(Math.random() * 21) - 10;
@@ -84,29 +101,35 @@
       renderEquation();
     }
 
-    function renderEquation() {
+    function renderEquation(command = null) {
       const equationContainer = document.getElementById("equation-container");
 
+      // Print the updated equation
       const equationDiv = document.createElement("div");
       equationDiv.className = "equation";
       equationDiv.textContent = formatEquation(a, b, c, d);
       equationContainer.appendChild(equationDiv);
 
+      // Check for end state
       if ((a === 1 && b === 0 && c === 0) || (a === 0 && c === 1 && d === 0)) {
         const successMessage = document.createElement("div");
         successMessage.className = "success-message";
-        successMessage.textContent = "Well done! You have solved the equation.";
+        const solution = a === 1 ? formatNumber(d) : formatNumber(b);
+        successMessage.textContent = `Well done! You have solved the equation. x = ${solution}`;
         equationContainer.appendChild(successMessage);
 
-        const solution = a === 1 ? `x = ${formatNumber(d)}` : `x = ${formatNumber(b)}`;
-        const solutionMessage = document.createElement("div");
-        solutionMessage.className = "success-message";
-        solutionMessage.textContent = solution;
-        equationContainer.appendChild(solutionMessage);
-
+        // Add "NEW EQUATION" button
+        const newEquationButton = document.createElement("button");
+        newEquationButton.className = "new-equation-button";
+        newEquationButton.textContent = "NEW EQUATION";
+        newEquationButton.style.display = "block"; // Makes the button a block element
+        newEquationButton.style.margin = "20px auto"; // Centers the button horizontally
+        newEquationButton.onclick = generateEquation;
+        equationContainer.appendChild(newEquationButton);
         return;
       }
 
+      // Add input box for the next command
       const inputContainer = document.createElement("div");
       inputContainer.className = "input-container";
 
@@ -128,40 +151,29 @@
           const input = inputBox.value.trim();
 
           if (!validateInput(input)) {
-            errorMessage.textContent = "Try again.";
+            errorMessage.textContent = "Invalid command. Try again.";
             return;
           }
 
           errorMessage.textContent = "";
-          processCommand(input);
-
           inputBox.disabled = true;
-          renderEquation();
+          processCommand(input);
+          renderEquation(input);
         }
       });
     }
 
     function processCommand(command) {
-      const value = parseFloat(command.slice(1).replace("x", ""));
+      const value = parseFloat(command.slice(1).replace("x", "")) || 1; // Default to 1 if unspecified
       const operation = command[0];
 
       if (command.includes("x")) {
         if (operation === "+") {
-          if (isNaN(value)) {
-            a += 1;
-            c += 1;
-          } else {
-            a += value;
-            c += value;
-          }
+          a += value;
+          c += value;
         } else if (operation === "-") {
-          if (isNaN(value)) {
-            a -= 1;
-            c -= 1;
-          } else {
-            a -= value;
-            c -= value;
-          }
+          a -= value;
+          c -= value;
         }
       } else {
         if (operation === "+") {
