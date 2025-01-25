@@ -177,31 +177,22 @@ function formatEquation(a, b, c, d) {
   const inputContainer = document.createElement("div");
   inputContainer.className = "input-container";
 
-  // First input box (interactive)
-  const inputBox1 = document.createElement("input");
-  inputBox1.className = "input-box";
-  inputBox1.type = "text";
-  inputContainer.appendChild(inputBox1);
+  const inputBox = document.createElement("input");
+  inputBox.className = "input-box";
+  inputBox.type = "text";
+  inputContainer.appendChild(inputBox);
 
-  // Second input box (mirroring input)
-  const inputBox2 = document.createElement("input");
-  inputBox2.className = "input-box";
-  inputBox2.type = "text";
-  inputBox2.disabled = true;  // This box will not accept user input
-  inputContainer.appendChild(inputBox2);
+  const errorMessage = document.createElement("span");
+  errorMessage.className = "error-message";
+  inputContainer.appendChild(errorMessage);
 
   equationContainer.appendChild(inputContainer);
 
-  inputBox1.focus();
+  inputBox.focus();
 
-  inputBox1.addEventListener("input", () => {
-    // Mirror the first box's content to the second box
-    inputBox2.value = inputBox1.value;
-  });
-
-  inputBox1.addEventListener("keydown", (e) => {
+  inputBox.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
-      const input = inputBox1.value.trim();
+      const input = inputBox.value.trim();
 
       if (!validateInput(input)) {
         errorMessage.textContent = "Invalid command. Try again.";
@@ -209,12 +200,13 @@ function formatEquation(a, b, c, d) {
       }
 
       errorMessage.textContent = "";
-      inputBox1.disabled = true;
+      inputBox.disabled = true;
       processCommand(input);
       renderEquation(input);
     }
   });
 }
+
 
 
     function processCommand(command) {
