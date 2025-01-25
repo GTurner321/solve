@@ -134,10 +134,15 @@
     function generateEquation() {
   const equationContainer = document.getElementById("equation-container");
   equationContainer.innerHTML = "";
+  
+  // Ensure a and c are not 0
   do {
     a = Math.floor(Math.random() * 21) - 10;
+  } while (a === 0);
+
+  do {
     c = Math.floor(Math.random() * 21) - 10;
-  } while (a === c);
+  } while (c === 0);
 
   // Ensure b and d are not 0
   do {
