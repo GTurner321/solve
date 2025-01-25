@@ -134,24 +134,21 @@
     function generateEquation() {
   const equationContainer = document.getElementById("equation-container");
   equationContainer.innerHTML = "";
-  
-  // Ensure a and c are not 0
   do {
     a = Math.floor(Math.random() * 21) - 10;
-  } while (a === 0);
-
-  do {
     c = Math.floor(Math.random() * 21) - 10;
-  } while (c === 0);
+  } while (a === c || a === 0 || c === 0);  // Ensure a and c are not equal, and not zero
 
-  // Ensure b and d are not 0
-  do {
+  b = Math.floor(Math.random() * 21) - 10;
+  d = Math.floor(Math.random() * 21) - 10;
+
+  // Ensure b and d are not zero
+  while (b === 0) {
     b = Math.floor(Math.random() * 21) - 10;
-  } while (b === 0);
-
-  do {
+  }
+  while (d === 0) {
     d = Math.floor(Math.random() * 21) - 10;
-  } while (d === 0);
+  }
 
   renderEquation();
 }
