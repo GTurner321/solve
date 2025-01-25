@@ -190,31 +190,44 @@ function formatEquation(a, b, c, d) {
 
   const inputContainer = document.createElement("div");
   inputContainer.className = "input-container";
+  inputContainer.style.display = "flex";
+  inputContainer.style.gap = "10px";
 
   const inputBox = document.createElement("input");
   inputBox.className = "input-box";
   inputBox.type = "text";
+  inputBox.style.flex = "1"; // Adjust width to fit alongside the second box
   inputContainer.appendChild(inputBox);
 
-  const errorMessage = document.createElement("span");
-  errorMessage.className = "error-message";
-  inputContainer.appendChild(errorMessage);
+  const mirroredBox = document.createElement("input");
+  mirroredBox.className = "input-box";
+  mirroredBox.type = "text";
+  mirroredBox.disabled = true; // Make the second box non-editable
+  mirroredBox.style.flex = "1"; // Match width with the first box
+  inputContainer.appendChild(mirroredBox);
 
   equationContainer.appendChild(inputContainer);
 
   inputBox.focus();
+
+  inputBox.addEventListener("input", (e) => {
+    mirroredBox.value = e.target.value; // Copy input value to the second box
+  });
 
   inputBox.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       const input = inputBox.value.trim();
 
       if (!validateInput(input)) {
+        const errorMessage = document.createElement("span");
+        errorMessage.className = "error-message";
         errorMessage.textContent = "Invalid command. Try again.";
+        inputContainer.appendChild(errorMessage);
         return;
       }
 
-      errorMessage.textContent = "";
       inputBox.disabled = true;
+      mirroredBox.disabled = true; // Lock the mirrored box when input is confirmed
       processCommand(input);
       renderEquation(input);
     }
