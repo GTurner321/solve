@@ -116,15 +116,19 @@ function formatEquation(a, b, c, d) {
     d = 0; // Ensure d is not printed
   }
 
-  const left = [
-    a !== 0 ? `${a === 1 ? "" : a === -1 ? "-" : formatNumber(a)}x` : "",
-    b !== 0 ? `${b > 0 && a !== 0 ? "+" : ""}${formatNumber(b)}` : "",
-  ].join("").trim() || "0";
+  const left = Math.abs(a) < 0.000001 && Math.abs(b) < 0.000001
+    ? "0"
+    : [
+        a !== 0 ? `${a === 1 ? "" : a === -1 ? "-" : formatNumber(a)}x` : "",
+        b !== 0 ? `${b > 0 && a !== 0 ? "+" : ""}${formatNumber(b)}` : "",
+      ].join("").trim() || "0";
 
-  const right = [
-    c !== 0 ? `${c === 1 ? "" : c === -1 ? "-" : formatNumber(c)}x` : "",
-    d !== 0 ? `${d > 0 && c !== 0 ? "+" : ""}${formatNumber(d)}` : "",
-  ].join("").trim() || "0";
+  const right = Math.abs(c) < 0.000001 && Math.abs(d) < 0.000001
+    ? "0"
+    : [
+        c !== 0 ? `${c === 1 ? "" : c === -1 ? "-" : formatNumber(c)}x` : "",
+        d !== 0 ? `${d > 0 && c !== 0 ? "+" : ""}${formatNumber(d)}` : "",
+      ].join("").trim() || "0";
 
   return `${left} = ${right}`;
 }
