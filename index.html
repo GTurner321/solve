@@ -161,84 +161,83 @@ function updateScore(bonusPoints) {
 }
 
     function renderEquation(command = null) {
-  const equationContainer = document.getElementById("equation-container");
+const equationContainer = document.getElementById("equation-container");
 
-  const equationDiv = document.createElement("div");
-  equationDiv.className = "equation";
-  equationDiv.textContent = formatEquation(a, b, c, d);
-  equationContainer.appendChild(equationDiv);
+const equationDiv = document.createElement("div");
+equationDiv.className = "equation";
+equationDiv.textContent = formatEquation(a, b, c, d);
+equationContainer.appendChild(equationDiv);
 
-  if (
-    (Math.abs(a - 1) < 0.000001 && Math.abs(b) < 0.000001 && Math.abs(c) < 0.000001) ||
-    (Math.abs(a) < 0.000001 && Math.abs(c - 1) < 0.000001 && Math.abs(d) < 0.000001)
-  ) {
-    const successMessage = document.createElement("div");
-    successMessage.className = "success-message";
-    const solution = Math.abs(a - 1) < 0.000001 ? formatNumber(d) : formatNumber(b);
-    successMessage.textContent = `Well done! You have solved the equation. x = ${solution}`;
-    equationContainer.appendChild(successMessage);
+if (
+(Math.abs(a - 1) < 0.000001 && Math.abs(b) < 0.000001 && Math.abs(c) < 0.000001) ||
+(Math.abs(a) < 0.000001 && Math.abs(c - 1) < 0.000001 && Math.abs(d) < 0.000001)
+) {
+const successMessage = document.createElement("div");
+successMessage.className = "success-message";
+const solution = Math.abs(a - 1) < 0.000001 ? formatNumber(d) : formatNumber(b);
+successMessage.textContent = `Well done! You have solved the equation. x = ${solution}`;
+equationContainer.appendChild(successMessage);
 
-    // Display points and bonus
-    const pointsMessage = document.createElement("div");
-    pointsMessage.className = "points-message";
-    pointsMessage.textContent = `Points: 3 +${bonusPoints} bonus`;
-    equationContainer.appendChild(pointsMessage);
+// Display points and bonus
+const pointsMessage = document.createElement("div");
+pointsMessage.className = "points-message";
+pointsMessage.textContent = `Points: 3 +${bonusPoints} bonus`;
+equationContainer.appendChild(pointsMessage);
 
-    // Update score with 3 + bonus points
-    updateScore(bonusPoints);
+// Update score with 3 + bonus points
+updateScore(bonusPoints);
 
-    const newEquationButton = document.createElement("button");
-    newEquationButton.className = "new-equation-button";
-    newEquationButton.textContent = "NEW EQUATION";
-    newEquationButton.onclick = () => {
-      generateEquation();
-      window.scrollTo(0, 0); // Scroll back to the top for a new equation
-    };
-    document.body.appendChild(newEquationButton); // Put button outside equation container
+const newEquationButton = document.createElement("button");
+newEquationButton.className = "new-equation-button";
+newEquationButton.textContent = "NEW EQUATION";
+newEquationButton.onclick = () => {
+generateEquation();
+window.scrollTo(0, 0); // Scroll back to the top for a new equation
+};
+document.body.appendChild(newEquationButton); // Put button outside equation container
 
-    successMessage.scrollIntoView({ behavior: "smooth", block: "center" });
-    return;
-  }
-
-  const inputContainer = document.createElement("div");
-  inputContainer.className = "input-container";
-
-  const inputBox = document.createElement("input");
-  inputBox.className = "input-box";
-  inputBox.type = "text";
-  inputContainer.appendChild(inputBox);
-
-  const errorMessage = document.createElement("span");
-  errorMessage.className = "error-message";
-  inputContainer.appendChild(errorMessage);
-
-  equationContainer.appendChild(inputContainer);
-
-  inputBox.focus();
-
-  inputBox.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const input = inputBox.value.trim();
-
-      if (!validateInput(input)) {
-        errorMessage.textContent = "Invalid command. Try again.";
-        return;
-      }
-
-      errorMessage.textContent = "";
-      inputBox.disabled = true;
-      processCommand(input);
-      renderEquation(input);
-
-      // Simulate 'New Equation' button click when 'Enter' is pressed
-      const newEquationButton = document.querySelector(".new-equation-button");
-      if (newEquationButton) {
-        newEquationButton.click();
-      }
-    }
-  });
+successMessage.scrollIntoView({ behavior: "smooth", block: "center" });
+return;
 }
 
+const inputContainer = document.createElement("div");
+inputContainer.className = "input-container";
+
+const inputBox = document.createElement("input");
+inputBox.className = "input-box";
+inputBox.type = "text";
+inputContainer.appendChild(inputBox);
+
+const errorMessage = document.createElement("span");
+errorMessage.className = "error-message";
+inputContainer.appendChild(errorMessage);
+
+equationContainer.appendChild(inputContainer);
+
+inputBox.focus();
+
+inputBox.addEventListener("keydown", (e) => {
+if (e.key === "Enter") {
+const input = inputBox.value.trim();
+
+if (!validateInput(input)) {
+errorMessage.textContent = "Invalid command. Try again.";
+return;
+}
+
+errorMessage.textContent = "";
+inputBox.disabled = true;
+processCommand(input);
+renderEquation(input);
+
+// Simulate 'New Equation' button click when 'Enter' is pressed
+const newEquationButton = document.querySelector(".new-equation-button");
+if (newEquationButton) {
+newEquationButton.click();
+}
+}
+});
+}
     
     function processCommand(command) {
       const value = parseFloat(command.slice(1).replace("x", "")) || 1;
