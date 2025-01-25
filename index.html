@@ -132,18 +132,24 @@
     }
 
     function generateEquation() {
-      const equationContainer = document.getElementById("equation-container");
-      equationContainer.innerHTML = "";
-      do {
-        a = Math.floor(Math.random() * 21) - 10;
-        c = Math.floor(Math.random() * 21) - 10;
-      } while (a === c);
+  const equationContainer = document.getElementById("equation-container");
+  equationContainer.innerHTML = "";
+  do {
+    a = Math.floor(Math.random() * 21) - 10;
+    c = Math.floor(Math.random() * 21) - 10;
+  } while (a === c);
 
-      b = Math.floor(Math.random() * 21) - 10;
-      d = Math.floor(Math.random() * 21) - 10;
+  // Ensure b and d are not 0
+  do {
+    b = Math.floor(Math.random() * 21) - 10;
+  } while (b === 0);
 
-      renderEquation();
-    }
+  do {
+    d = Math.floor(Math.random() * 21) - 10;
+  } while (d === 0);
+
+  renderEquation();
+}
 
     function renderEquation(command = null) {
       const equationContainer = document.getElementById("equation-container");
