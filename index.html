@@ -176,25 +176,16 @@ function updateScore(bonusPoints) {
     successMessage.className = "success-message";
     const solution = Math.abs(a - 1) < 0.000001 ? formatNumber(d) : formatNumber(b);
     successMessage.textContent = `Well done! You have solved the equation. x = ${solution}`;
-
-    // Calculate bonus points based on inputCount
-    let bonusPoints = 0;
-    if (inputCount <= 3) {
-      bonusPoints = 3;
-    } else if (inputCount === 4) {
-      bonusPoints = 2;
-    } else if (inputCount === 5) {
-      bonusPoints = 1;
-    }
-
-    successMessage.textContent += `\nPoints: 3 + ${bonusPoints} bonus`;
-
     equationContainer.appendChild(successMessage);
 
-    updateScore(bonusPoints);
+    // Display points and bonus
+    const pointsMessage = document.createElement("div");
+    pointsMessage.className = "points-message";
+    pointsMessage.textContent = `Points: 3 +${bonusPoints} bonus`;
+    equationContainer.appendChild(pointsMessage);
 
-    // Reset input count for next equation
-    inputCount = 0;
+    // Update score with 3 + bonus points
+    updateScore(bonusPoints);
 
     const newEquationButton = document.createElement("button");
     newEquationButton.className = "new-equation-button";
@@ -203,7 +194,7 @@ function updateScore(bonusPoints) {
       generateEquation();
       window.scrollTo(0, 0); // Scroll back to the top for a new equation
     };
-    equationContainer.appendChild(newEquationButton);
+    document.body.appendChild(newEquationButton); // Put button outside equation container
 
     successMessage.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
@@ -237,14 +228,17 @@ function updateScore(bonusPoints) {
       errorMessage.textContent = "";
       inputBox.disabled = true;
       processCommand(input);
-
-      // Increment input count
-      inputCount++;
-
       renderEquation(input);
+
+      // Simulate 'New Equation' button click when 'Enter' is pressed
+      const newEquationButton = document.querySelector(".new-equation-button");
+      if (newEquationButton) {
+        newEquationButton.click();
+      }
     }
   });
 }
+
     
     function processCommand(command) {
       const value = parseFloat(command.slice(1).replace("x", "")) || 1;
