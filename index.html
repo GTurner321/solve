@@ -102,18 +102,28 @@
 }
 
 
-   function formatEquation(a, b, c, d) {
+function formatEquation(a, b, c, d) {
   const isEndConditionI = Math.abs(a - 1) < 0.000001 && Math.abs(b) < 0.000001 && Math.abs(c) < 0.000001;
   const isEndConditionII = Math.abs(a) < 0.000001 && Math.abs(c - 1) < 0.000001 && Math.abs(d) < 0.000001;
 
+  if (isEndConditionI) {
+    a = 1; // Force a to 1 for display
+    b = 0; // Ensure b is not printed
+  }
+
+  if (isEndConditionII) {
+    c = 1; // Force c to 1 for display
+    d = 0; // Ensure d is not printed
+  }
+
   const left = [
     a !== 0 ? `${a === 1 ? "" : a === -1 ? "-" : formatNumber(a)}x` : "",
-    !isEndConditionI && b !== 0 ? `${b > 0 && a !== 0 ? "+" : ""}${formatNumber(b)}` : "",
+    b !== 0 ? `${b > 0 && a !== 0 ? "+" : ""}${formatNumber(b)}` : "",
   ].join("").trim() || "0";
 
   const right = [
     c !== 0 ? `${c === 1 ? "" : c === -1 ? "-" : formatNumber(c)}x` : "",
-    !isEndConditionII && d !== 0 ? `${d > 0 && c !== 0 ? "+" : ""}${formatNumber(d)}` : "",
+    d !== 0 ? `${d > 0 && c !== 0 ? "+" : ""}${formatNumber(d)}` : "",
   ].join("").trim() || "0";
 
   return `${left} = ${right}`;
@@ -206,6 +216,7 @@
     }
   });
 }
+
     function processCommand(command) {
       const value = parseFloat(command.slice(1).replace("x", "")) || 1;
       const operation = command[0];
