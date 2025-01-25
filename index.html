@@ -84,9 +84,9 @@ function updateScore(bonusPoints) {
 }
 
     function formatNumber(num) {
-  // If the absolute value of the number is less than 0.0005, return '0'
+  // If the absolute value of the number is less than 0.0005, return '0' or '-0' depending on the sign
   if (Math.abs(num) < 0.0005) {
-    return "0";
+    return num < 0 ? "-0" : "0";
   }
   
   // Otherwise, proceed with the existing logic
