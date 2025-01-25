@@ -107,12 +107,12 @@ function formatEquation(a, b, c, d) {
   const isEndConditionII = Math.abs(a) < 0.000001 && Math.abs(c - 1) < 0.000001 && Math.abs(d) < 0.000001;
 
   const left = [
-    a !== 0 ? `${a === 1 ? "x" : a === -1 ? "-x" : formatNumber(a) + "x"}` : "",
+    a !== 0 ? (a === 1 ? "x" : a === -1 ? "-x" : formatNumber(a) + "x") : "",
     !isEndConditionI && b !== 0 ? `${b > 0 && a !== 0 ? "+" : ""}${formatNumber(b)}` : "",
   ].join("").trim() || "0";
 
   const right = [
-    c !== 0 ? `${c === 1 ? "x" : c === -1 ? "-x" : formatNumber(c) + "x"}` : "",
+    c !== 0 ? (c === 1 ? "x" : c === -1 ? "-x" : formatNumber(c) + "x") : "",
     !isEndConditionII && d !== 0 ? `${d > 0 && c !== 0 ? "+" : ""}${formatNumber(d)}` : "",
   ].join("").trim() || "0";
 
