@@ -89,7 +89,12 @@ function updateScore(bonusPoints) {
     return num < 0 ? "-0" : "0";
   }
   
-  // Otherwise, proceed with the existing logic
+  // If the number is a multiple of 10 (like 200), keep the integer part intact
+  if (num % 10 === 0 && num % 1 === 0) {
+    return num.toString();
+  }
+  
+  // Otherwise, proceed with the existing logic for decimal values
   const formatted = num.toFixed(8);
   
   // Check if there are non-zero digits beyond the 3rd decimal place
