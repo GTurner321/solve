@@ -78,8 +78,9 @@
     let inputCount = 0; // Track number of user inputs
 
 function updateScore(bonusPoints) {
-  successCount++;
-  score = successCount * 3 + bonusPoints; // Update score with bonus points
+  // Add base 3 points and bonus points to the score
+  const totalPoints = 3 + bonusPoints;
+  score += totalPoints;
   document.getElementById("score-box").textContent = `Score = ${score}`;
 }
 
@@ -161,7 +162,7 @@ function updateScore(bonusPoints) {
 
     function renderEquation(command = null) {
   const equationContainer = document.getElementById("equation-container");
-  
+
   const equationDiv = document.createElement("div");
   equationDiv.className = "equation";
   equationDiv.textContent = formatEquation(a, b, c, d);
@@ -176,7 +177,7 @@ function updateScore(bonusPoints) {
     const solution = Math.abs(a - 1) < 0.000001 ? formatNumber(d) : formatNumber(b);
     successMessage.textContent = `Well done! You have solved the equation. x = ${solution}`;
 
-    // Calculate bonus points based on input count
+    // Calculate bonus points based on inputCount
     let bonusPoints = 0;
     if (inputCount <= 3) {
       bonusPoints = 3;
@@ -186,20 +187,14 @@ function updateScore(bonusPoints) {
       bonusPoints = 1;
     }
 
-    // Display points message
-    const pointsMessage = document.createElement("div");
-    pointsMessage.className = "success-message";
-    if (bonusPoints > 0) {
-      pointsMessage.textContent = `Points: 3 + ${bonusPoints} bonus`;
-    } else {
-      pointsMessage.textContent = `Points: 3`;
-    }
+    successMessage.textContent += `\nPoints: 3 + ${bonusPoints} bonus`;
 
-    // Append success and points messages
     equationContainer.appendChild(successMessage);
-    equationContainer.appendChild(pointsMessage);
 
-    updateScore(bonusPoints); // Update the score with bonus points
+    updateScore(bonusPoints);
+
+    // Reset input count for next equation
+    inputCount = 0;
 
     const newEquationButton = document.createElement("button");
     newEquationButton.className = "new-equation-button";
@@ -211,7 +206,6 @@ function updateScore(bonusPoints) {
     equationContainer.appendChild(newEquationButton);
 
     successMessage.scrollIntoView({ behavior: "smooth", block: "center" });
-    inputCount = 0; // Reset input count for next equation
     return;
   }
 
@@ -242,8 +236,11 @@ function updateScore(bonusPoints) {
 
       errorMessage.textContent = "";
       inputBox.disabled = true;
-      inputCount++; // Increment input count on each user input
       processCommand(input);
+
+      // Increment input count
+      inputCount++;
+
       renderEquation(input);
     }
   });
