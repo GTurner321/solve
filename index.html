@@ -191,27 +191,28 @@ function formatEquation(a, b, c, d) {
   const inputContainer = document.createElement("div");
   inputContainer.className = "input-container";
   inputContainer.style.display = "flex";
-  inputContainer.style.gap = "10px";
+  inputContainer.style.justifyContent = "center"; // Center the boxes in the row
+  inputContainer.style.gap = "20px"; // Add space between the boxes
 
   const inputBox = document.createElement("input");
   inputBox.className = "input-box";
   inputBox.type = "text";
-  inputBox.style.flex = "1"; // Adjust width to fit alongside the second box
+  inputBox.style.flex = "0 0 45%"; // Make each box half the length of the row
   inputContainer.appendChild(inputBox);
 
   const mirroredBox = document.createElement("input");
   mirroredBox.className = "input-box";
   mirroredBox.type = "text";
   mirroredBox.disabled = true; // Make the second box non-editable
-  mirroredBox.style.flex = "1"; // Match width with the first box
+  mirroredBox.style.flex = "0 0 45%"; // Make each box half the length of the row
   inputContainer.appendChild(mirroredBox);
 
   equationContainer.appendChild(inputContainer);
 
   inputBox.focus();
 
-  inputBox.addEventListener("input", (e) => {
-    mirroredBox.value = e.target.value; // Copy input value to the second box
+  inputBox.addEventListener("input", () => {
+    mirroredBox.value = inputBox.value; // Mirror the value from the first box
   });
 
   inputBox.addEventListener("keydown", (e) => {
@@ -219,15 +220,12 @@ function formatEquation(a, b, c, d) {
       const input = inputBox.value.trim();
 
       if (!validateInput(input)) {
-        const errorMessage = document.createElement("span");
-        errorMessage.className = "error-message";
         errorMessage.textContent = "Invalid command. Try again.";
-        inputContainer.appendChild(errorMessage);
         return;
       }
 
+      errorMessage.textContent = "";
       inputBox.disabled = true;
-      mirroredBox.disabled = true; // Lock the mirrored box when input is confirmed
       processCommand(input);
       renderEquation(input);
     }
