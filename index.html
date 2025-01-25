@@ -84,12 +84,12 @@ function updateScore(bonusPoints) {
 }
 
     function formatNumber(num) {
-  // Check if the number is an integer
-  if (Number.isInteger(num)) {
-    return num.toString(); // No need to format integers, just return the number as a string
+  // If the absolute value of the number is less than 0.0005, return '0'
+  if (Math.abs(num) < 0.0005) {
+    return "0";
   }
-
-  // Convert the number to a string with up to 8 decimal places for inspection
+  
+  // Otherwise, proceed with the existing logic
   const formatted = num.toFixed(8);
   
   // Check if there are non-zero digits beyond the 3rd decimal place
