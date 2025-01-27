@@ -174,47 +174,56 @@ function renderEquation(command = null) {
   equationDiv.textContent = formatEquation(a, b, c, d);
   equationContainer.appendChild(equationDiv);
 
-  if (
-    (Math.abs(a - 1) < 0.000001 && Math.abs(b) < 0.000001 && Math.abs(c) < 0.000001) ||
-    (Math.abs(a) < 0.000001 && Math.abs(c - 1) < 0.000001 && Math.abs(d) < 0.000001)
-  ) {
-    const successMessage = document.createElement("div");
-    successMessage.className = "success-message";
-    const solution = Math.abs(a - 1) < 0.000001 ? formatNumber(d) : formatNumber(b);
-    successMessage.textContent = `Well done! You have solved the equation. x = ${solution}`;
-    equationContainer.appendChild(successMessage);
+if (
+  (Math.abs(a - 1) < 0.000001 && Math.abs(b) < 0.000001 && Math.abs(c) < 0.000001) ||
+  (Math.abs(a) < 0.000001 && Math.abs(c - 1) < 0.000001 && Math.abs(d) < 0.000001)
+) {
+  const successMessage = document.createElement("div");
+  successMessage.className = "success-message";
+  const solution = Math.abs(a - 1) < 0.000001 ? formatNumber(d) : formatNumber(b);
+  successMessage.textContent = `Well done! You have solved the equation. x = ${solution}`;
+  equationContainer.appendChild(successMessage);
 
-    // Adding the points statement
-    let pointsMessage = `Points: 3`;
-    if (inputCount <= 3) {
-      pointsMessage += " +3 bonus";
-      updateScore(3); // Adding 3 points + bonus
-    } else if (inputCount === 4) {
-      pointsMessage += " +2 bonus";
-      updateScore(2); // Adding 2 bonus points
-    } else if (inputCount === 5) {
-      pointsMessage += " +1 bonus";
-      updateScore(1); // Adding 1 bonus point
-    }
+  // Bonus points logic
+  let pointsMessage = "Points: 3";
+  let bonusPoints = 0;
 
-    const pointsDiv = document.createElement("div");
-    pointsDiv.className = "points-message";
-    pointsDiv.textContent = pointsMessage;
-    equationContainer.appendChild(pointsDiv);
-
-    // New equation button
-    const newEquationButton = document.createElement("button");
-    newEquationButton.className = "new-equation-button";
-    newEquationButton.textContent = "NEW EQUATION";
-    newEquationButton.onclick = () => {
-      generateEquation();
-      window.scrollTo(0, 0); // Scroll back to the top for a new equation
-    };
-    equationContainer.appendChild(newEquationButton);
-
-    successMessage.scrollIntoView({ behavior: "smooth", block: "center" });
-    return;
+  if (inputCount <= 3) {
+    bonusPoints = 3;
+    pointsMessage += " +3 bonus";
+  } else if (inputCount === 4) {
+    bonusPoints = 2;
+    pointsMessage += " +2 bonus";
+  } else if (inputCount === 5) {
+    bonusPoints = 1;
+    pointsMessage += " +1 bonus";
+  } else {
+    bonusPoints = 0; // No bonus points for 6 or more inputs
   }
+
+  // Update the score with base points and bonus points
+  updateScore(bonusPoints);
+
+  // Display the points message
+  const pointsDiv = document.createElement("div");
+  pointsDiv.className = "points-message";
+  pointsDiv.textContent = pointsMessage;
+  equationContainer.appendChild(pointsDiv);
+
+  // New equation button
+  const newEquationButton = document.createElement("button");
+  newEquationButton.className = "new-equation-button";
+  newEquationButton.textContent = "NEW EQUATION";
+  newEquationButton.onclick = () => {
+    generateEquation();
+    window.scrollTo(0, 0); // Scroll back to the top for a new equation
+  };
+  equationContainer.appendChild(newEquationButton);
+
+  successMessage.scrollIntoView({ behavior: "smooth", block: "center" });
+  return;
+}
+
 
   const inputContainer = document.createElement("div");
   inputContainer.className = "input-container";
