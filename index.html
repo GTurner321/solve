@@ -145,12 +145,16 @@ function updateScore(bonusPoints) {
     }
 
     function generateEquation() {
+  // Reset inputCount when a new equation is generated
+  inputCount = 0;
+
   const equationContainer = document.getElementById("equation-container");
   equationContainer.innerHTML = "";
+
   do {
     a = Math.floor(Math.random() * 21) - 10;
     c = Math.floor(Math.random() * 21) - 10;
-  } while (a === c || a === 0 || c === 0 || Math.abs(a - c) === 1);  // Ensure a and c are not equal, and not zero, and their difference is not 1
+  } while (a === c || a === 0 || c === 0 || Math.abs(a - c) === 1); // Ensure a and c are not equal, not zero, and their difference is not 1
 
   b = Math.floor(Math.random() * 21) - 10;
   d = Math.floor(Math.random() * 21) - 10;
@@ -165,6 +169,7 @@ function updateScore(bonusPoints) {
 
   renderEquation();
 }
+
 
 function renderEquation(command = null) {
   const equationContainer = document.getElementById("equation-container");
