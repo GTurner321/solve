@@ -242,20 +242,23 @@ if (
   inputBox.focus();
 
   inputBox.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const input = inputBox.value.trim();
+  if (e.key === "Enter") {
+    const input = inputBox.value.trim();
 
-      if (!validateInput(input)) {
-        errorMessage.textContent = "Invalid command. Try again.";
-        return;
-      }
-
-      errorMessage.textContent = "";
-      inputBox.disabled = true;
-      processCommand(input);
-      renderEquation(input);
+    if (!validateInput(input)) {
+      errorMessage.textContent = "Invalid command. Try again.";
+      return;
     }
-  });
+
+    // Increment inputCount for each valid input
+    inputCount += 1;
+
+    errorMessage.textContent = "";
+    inputBox.disabled = true;
+    processCommand(input);
+    renderEquation(input);
+  }
+});
 }
 
     
