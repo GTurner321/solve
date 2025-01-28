@@ -61,7 +61,7 @@
     .new-equation-button:hover {
       background-color: darkgreen;
     }
-    #score-box {
+        #score-box {
       position: fixed;
       top: 10px;
       right: 10px;
@@ -75,6 +75,7 @@
   </style>
 </head>
 <body>
+  <button id="new-equation-top" class="new-equation-button">NEW EQUATION</button>
   <div id="equation-container"></div>
   <div id="score-box">Score = 0</div>
   <script>
@@ -300,7 +301,16 @@ if (
       }
     }
 
-    generateEquation();
+    function handleNewEquation() {
+  generateEquation(); // Generates a new equation
+  window.scrollTo(0, 0); // Scroll to the top of the page
+}
+
+// Add event listener to the top button for generating a new equation
+window.onload = () => {
+  document.getElementById("new-equation-top").addEventListener("click", handleNewEquation);
+};
+
   </script>
 </body>
 </html>
